@@ -497,7 +497,7 @@ function initCuriosoListener(): () => void {
       sessionEventFiltersClicked.add(chip.textContent?.trim() ?? '');
       if (sessionEventFiltersClicked.size >= total) {
         unlockAchievement('curioso');
-        container.removeEventListener('click', onClick);
+        container?.removeEventListener('click', onClick);
         removeListener = null;
       }
     }
@@ -608,6 +608,7 @@ function initHorarioAula() {
     brandEl.dataset.eeAula = '1';
 
     function onMouseEnter() {
+      if (!brandEl) return;
       if (sessionStorage.getItem('magnatas_aula_shown')) return;
       sessionStorage.setItem('magnatas_aula_shown', '1');
       brandEl.removeEventListener('mouseenter', onMouseEnter);
