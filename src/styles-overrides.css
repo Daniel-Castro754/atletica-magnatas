@@ -1,0 +1,1079 @@
+
+/* ============================================================
+   MAGNATAS VISUAL IDENTITY OVERRIDES
+   Identidade esportiva: Azul #1a3a5c / #2563eb · Vermelho #c0392b
+   ============================================================ */
+
+/* --- 1. FUNDO DA PÁGINA: Neutro (remove rosa/tonalidades dinâmicas) --- */
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.07), transparent 28%),
+    radial-gradient(circle at top right, rgba(192, 57, 43, 0.05), transparent 22%),
+    linear-gradient(180deg, #f0f4f8 0%, #f8f9fa 40%, #ffffff 100%) !important;
+}
+
+/* --- 2. HERO SECTION — Dark, impactante --- */
+
+/* Extensão full-bleed escura atrás do hero */
+.home-hero-refined {
+  position: relative;
+  z-index: 0;
+}
+
+.home-hero-refined::before {
+  content: "";
+  position: absolute;
+  top: -2.4rem;
+  bottom: -0.5rem;
+  left: calc(-50vw + 50%);
+  right: calc(-50vw + 50%);
+  background: linear-gradient(160deg, #0d1117 0%, #111827 100%);
+  z-index: -1;
+}
+
+/* Card de texto do hero: escuro/transparente sobre fundo dark */
+.hero-copy-surface {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
+}
+
+/* Textos do hero sobre fundo escuro */
+.hero-copy-surface .display-title,
+.hero-copy-surface h1,
+.home-hero-refined .display-title {
+  color: #ffffff !important;
+}
+
+.home-subtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.hero-copy-surface .lead {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.hero-copy-surface .muted,
+.hero-copy-surface .hero-support-note {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.hero-copy-surface .kicker {
+  color: #c0392b !important;
+}
+
+/* Separador do bloco de suporte no hero */
+.hero-copy-surface .hero-support-block {
+  border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Pills no hero */
+.hero-copy-surface .hero-support-pill {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Botão primário do hero: vermelho */
+.hero-copy-surface .button {
+  background: linear-gradient(135deg, #c0392b 0%, #9b2b20 100%) !important;
+  box-shadow: 0 14px 30px rgba(192, 57, 43, 0.35) !important;
+  color: #ffffff !important;
+}
+
+.hero-copy-surface .button:hover {
+  background: linear-gradient(135deg, #a93226 0%, #922b21 100%) !important;
+}
+
+/* Botão secundário do hero: borda branca transparente */
+.hero-copy-surface .button-secondary {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.hero-copy-surface .button-secondary:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
+.hero-copy-surface .button-outline {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.hero-copy-surface .button-outline:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Card da imagem do mascote: escuro, mais impactante */
+.hero-image-card {
+  background: linear-gradient(160deg, #111827 0%, #1a1d2e 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5) !important;
+}
+
+.hero-image-frame {
+  min-height: 380px !important;
+  background: linear-gradient(135deg, rgba(26, 58, 92, 0.3), rgba(192, 57, 43, 0.15)) !important;
+}
+
+/* Card de nota abaixo do mascote */
+.hero-cover-note {
+  background: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3) !important;
+}
+
+.hero-cover-kicker {
+  color: #c0392b !important;
+}
+
+.hero-cover-note-title {
+  color: #ffffff !important;
+}
+
+.hero-cover-note-text {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* --- 3. TIPOGRAFIA --- */
+
+.display-title {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.section-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Kicker sempre em vermelho vibrante */
+.kicker {
+  color: #c0392b;
+}
+
+/* Título da loja */
+.store-header .section-title {
+  font-weight: 800;
+}
+
+/* --- 4. CARDS DE PRODUTO — Hover com destaque vermelho --- */
+
+.product-grid .product-card {
+  transition:
+    border-color 180ms ease,
+    box-shadow 200ms ease,
+    transform 180ms ease;
+}
+
+.product-grid .product-card:hover {
+  border-color: #c0392b !important;
+  box-shadow: 0 10px 30px rgba(192, 57, 43, 0.2) !important;
+  transform: translateY(-2px);
+}
+
+/* Preço em vermelho na grade de produtos */
+.product-grid .price {
+  color: #c0392b !important;
+  font-weight: 800;
+}
+
+/* Badge de categoria: azul escuro / branco */
+.store-category-pill {
+  background: #1a3a5c !important;
+  border-color: #1a3a5c !important;
+  color: #ffffff !important;
+}
+
+/* --- 5. NAVEGAÇÃO — Item ativo com underline vermelho --- */
+
+.nav-link-active,
+.mobile-nav-link-active {
+  background: rgba(192, 57, 43, 0.15) !important;
+  border-color: rgba(192, 57, 43, 0.22) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 -2px 0 0 #c0392b;
+}
+
+/* --- 6. PÁGINA DE EVENTOS --- */
+
+/* Card destaque: borda esquerda vermelha */
+.events-featured-card {
+  border-left: 4px solid #c0392b !important;
+  padding-left: 0.52rem;
+}
+
+/* Badge "featured" em vermelho */
+.event-status-pill-featured {
+  background: #c0392b !important;
+  color: #ffffff !important;
+}
+
+/* Pill accent geral */
+.pill-accent {
+  background: rgba(192, 57, 43, 0.12) !important;
+  color: #9b2b20 !important;
+  border-color: rgba(192, 57, 43, 0.2) !important;
+}
+
+/* Pills de categoria de evento: azul escuro */
+.events-card-grid .pill:not(.event-status-pill-featured):not(.pill-accent) {
+  background: #1a3a5c !important;
+  color: #ffffff !important;
+}
+
+/* --- 7. CANAIS / REDES SOCIAIS — Cores por canal --- */
+
+/* Instagram */
+[data-kind="instagram"] .home-contact-icon-shell {
+  background: rgba(225, 48, 108, 0.12) !important;
+  color: #e1306c !important;
+}
+
+[data-kind="instagram"] .button,
+[data-kind="instagram"] .button-outline {
+  background: #e1306c !important;
+  border-color: #e1306c !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(225, 48, 108, 0.28) !important;
+}
+
+[data-kind="instagram"] .button:hover,
+[data-kind="instagram"] .button-outline:hover {
+  background: #c4275e !important;
+  border-color: #c4275e !important;
+}
+
+/* WhatsApp */
+[data-kind="whatsapp"] .home-contact-icon-shell {
+  background: rgba(37, 211, 102, 0.12) !important;
+  color: #25d366 !important;
+}
+
+[data-kind="whatsapp"] .button,
+[data-kind="whatsapp"] .button-outline {
+  background: #25d366 !important;
+  border-color: #25d366 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(37, 211, 102, 0.28) !important;
+}
+
+[data-kind="whatsapp"] .button:hover,
+[data-kind="whatsapp"] .button-outline:hover {
+  background: #1db954 !important;
+  border-color: #1db954 !important;
+}
+
+/* Email */
+[data-kind="email"] .home-contact-icon-shell {
+  background: rgba(37, 99, 235, 0.12) !important;
+  color: #2563eb !important;
+}
+
+[data-kind="email"] .button,
+[data-kind="email"] .button-outline {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28) !important;
+}
+
+[data-kind="email"] .button:hover,
+[data-kind="email"] .button-outline:hover {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+/* Link genérico */
+[data-kind="link"] .home-contact-icon-shell {
+  background: rgba(26, 58, 92, 0.12) !important;
+  color: #1a3a5c !important;
+}
+
+/* --- 8. HIGHLIGHTS — Ícone azul escuro --- */
+
+.home-highlight-icon-shell {
+  background: rgba(26, 58, 92, 0.1) !important;
+  color: #1a3a5c !important;
+}
+
+.home-highlight-card {
+  transition: border-color 180ms ease, box-shadow 200ms ease;
+}
+
+.home-highlight-card:hover {
+  border-color: rgba(26, 58, 92, 0.2) !important;
+  box-shadow: 0 12px 32px rgba(26, 58, 92, 0.1) !important;
+}
+
+/* --- 9. BOTÃO PRIMÁRIO PADRÃO — Vermelho --- */
+
+.button {
+  background: linear-gradient(135deg, #c0392b 0%, #9b2b20 100%) !important;
+  box-shadow: 0 14px 30px rgba(192, 57, 43, 0.22) !important;
+  color: #ffffff !important;
+}
+
+.button:hover {
+  background: linear-gradient(135deg, #a93226 0%, #922b21 100%) !important;
+}
+
+/* --- 10. PREÇO NO DETALHE DO PRODUTO --- */
+
+.detail-price {
+  color: #1a3a5c !important;
+}
+
+/* --- 11. RESPONSIVO: ajustes do before no mobile --- */
+
+@media (max-width: 760px) {
+  .home-hero-refined::before {
+    top: -2rem;
+    left: -1rem;
+    right: -1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-hero-refined::before {
+    top: -2rem;
+    left: -1rem;
+    right: -1rem;
+  }
+}
+
+/* --- 12. ADMIN EVENTS — Tabs e badges coloridos --- */
+
+/* Painel de conteudo das abas Categorias / Importacao */
+.admin-events-tab-panel {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Ponto indicador de rascunho nao salvo na aba */
+.admin-tab-dirty-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c0392b;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Badge de categoria do evento: azul escuro */
+.admin-events-pill-category {
+  background: #1a3a5c !important;
+  color: #ffffff !important;
+  border-color: #1a3a5c !important;
+}
+
+/* Badge "Visivel": verde */
+.admin-events-pill-visible {
+  background: rgba(22, 101, 52, 0.12) !important;
+  color: #166534 !important;
+  border-color: rgba(22, 101, 52, 0.22) !important;
+}
+
+/* Badge "Oculto": neutro cinza */
+.admin-events-pill-hidden {
+  background: rgba(100, 116, 139, 0.1) !important;
+  color: #64748b !important;
+  border-color: rgba(100, 116, 139, 0.18) !important;
+}
+
+/* Colunas compactas de data e hora */
+.admin-events-col-compact {
+  white-space: nowrap;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+/* --- 13. ADMIN ANALYTICS — Filtros, chart e layout --- */
+
+/* Filtro de periodo */
+.analytics-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.analytics-period-group {
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba(26, 58, 92, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.analytics-period-btn {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.83rem;
+  font-weight: 500;
+  background: #ffffff;
+  color: #1a3a5c;
+  border: none;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.analytics-period-btn + .analytics-period-btn {
+  border-left: 1px solid rgba(26, 58, 92, 0.2);
+}
+
+.analytics-period-btn:hover {
+  background: rgba(26, 58, 92, 0.06);
+}
+
+.analytics-period-btn-active {
+  background: #1a3a5c !important;
+  color: #ffffff !important;
+}
+
+.analytics-period-pill {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+/* Chart area */
+.analytics-chart-card {
+  grid-column: 1 / -1;
+}
+
+.analytics-chart-wrap {
+  position: relative;
+  height: 260px;
+  margin-top: 0.5rem;
+}
+
+.analytics-chart-subtitle {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+/* Empty states */
+.analytics-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.analytics-empty-icon {
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+}
+
+/* Metric cards: icon em azul */
+.analytics-stat-grid .metric-card svg {
+  color: #1a3a5c;
+}
+
+.analytics-stat-grid .metric-value {
+  color: #1a3a5c;
+  font-weight: 800;
+}
+
+/* Admin card grid: 2×2 para as tabelas */
+.admin-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 760px) {
+  .admin-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- 14. VÍDEO DO MASCOTE — Hero da Home --- */
+
+/* Frame: permite que o vídeo portrait defina a altura */
+.hero-image-frame:has(.hero-mascote-video) {
+  min-height: unset !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* Vídeo: contém o mascote inteiro sem cortar */
+.hero-mascote-video {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-height: 85vh;
+  max-width: 100%;
+  object-fit: contain !important;
+  margin: 0 auto;
+}
+
+/* Imagem estática: oculta no desktop */
+.hero-mascote-fallback {
+  display: none;
+}
+
+/* Mobile: oculta o vídeo, exibe a imagem estática */
+@media (max-width: 760px) {
+  .hero-image-frame:has(.hero-mascote-video) {
+    min-height: 280px !important;
+    overflow: hidden;
+  }
+
+  .hero-mascote-video {
+    display: none;
+  }
+
+  .hero-mascote-fallback {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+}
+
+/* --- 15. VÍDEO DO MASCOTE — Hero Institucional --- */
+
+.institutional-video-hero {
+  position: relative;
+  background: #0d1117;
+  min-height: 480px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.institutional-video-bg {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: auto;
+  max-width: 48%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: 0.9;
+}
+
+.institutional-video-dimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(13, 17, 23, 1) 38%,
+    rgba(13, 17, 23, 0.55) 68%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+}
+
+.institutional-video-copy {
+  position: relative;
+  z-index: 1;
+  padding: 3.5rem max(1.5rem, calc(50vw - 580px));
+  max-width: 640px;
+}
+
+.institutional-video-kicker {
+  color: #c0392b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+}
+
+.institutional-video-title {
+  color: #ffffff;
+  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin: 0 0 0.9rem;
+}
+
+.institutional-video-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0;
+  max-width: 480px;
+}
+
+/* Mobile: oculta o vídeo, mantém o hero apenas com texto */
+@media (max-width: 760px) {
+  .institutional-video-bg {
+    display: none;
+  }
+
+  .institutional-video-hero {
+    min-height: 300px;
+  }
+
+  .institutional-video-dimmer {
+    background: rgba(13, 17, 23, 0.85);
+  }
+
+  .institutional-video-copy {
+    padding: 2.5rem 1.25rem;
+  }
+}
+
+/* ============================================================
+   16. PÁGINA DE EVENTOS — Compactação geral
+   ============================================================ */
+
+/* 1. Ocultar banner hero do topo */
+.events-page .events-hero-section {
+  display: none !important;
+}
+
+/* Remove margem extra que compensava o hero */
+.events-page .events-hero-section + .page-section {
+  padding-top: 0;
+}
+
+/* 2. Títulos de seção — 20px / weight 600 */
+.events-page .page-section .section-title {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Reduzir gap do page-header para aproximar título dos filtros */
+.events-page .page-header.page-header-stack {
+  margin-bottom: 0.4rem !important;
+}
+
+/* 3. CARD DE DESTAQUE — compactar */
+
+.events-page .events-featured-card {
+  padding: 14px !important;
+}
+
+.events-page .events-featured-image {
+  max-height: 220px !important;
+  min-height: unset !important;
+  align-self: start;
+}
+
+/* Título do destaque: 18px */
+.events-page .events-featured-card .section-title {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+}
+
+/* Descrição curta: 13px, 2 linhas */
+.events-page .events-featured-card .lead {
+  font-size: 0.8125rem !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  max-width: none !important;
+}
+
+/* Descrição longa (fullDescription usa .muted): ocultar */
+.events-page .events-featured-card > .events-featured-body > .muted {
+  display: none !important;
+}
+
+/* Meta (data, hora, local): 12px */
+.events-page .events-featured-card .events-meta-list {
+  font-size: 0.75rem !important;
+  gap: 0.28rem !important;
+}
+
+/* Botão Ver evento no destaque */
+.events-page .events-featured-card .button {
+  padding: 8px 16px !important;
+  font-size: 0.8125rem !important;
+}
+
+/* Badges do destaque: 11px */
+.events-page .events-featured-body .pill {
+  font-size: 0.6875rem !important;
+  padding: 0.18rem 0.46rem !important;
+}
+
+/* 4. CALENDÁRIO — compactar */
+
+.events-page .events-calendar-card,
+.events-page .events-day-panel {
+  padding: 0.56rem !important;
+  gap: 0.4rem !important;
+}
+
+/* Header do calendário: 14px */
+.events-page .events-calendar-head strong {
+  font-size: 0.875rem !important;
+}
+
+/* Botões Mês anterior / Próximo mês: 12px */
+.events-page .events-calendar-actions .chip {
+  font-size: 0.75rem !important;
+  padding: 0.2rem 0.52rem !important;
+}
+
+/* Células do calendário: menores */
+.events-page .events-calendar-day {
+  min-height: 1.7rem !important;
+  font-size: 0.8125rem !important;
+  border-radius: 8px !important;
+}
+
+.events-page .events-calendar-grid {
+  gap: 0.22rem !important;
+}
+
+/* Card lateral de eventos do dia */
+.events-page .events-day-item {
+  padding: 0.46rem !important;
+}
+
+.events-page .events-day-panel .admin-subcard-head strong {
+  font-size: 0.8125rem !important;
+}
+
+/* Título do evento no card lateral: 14px */
+.events-page .events-day-item .events-event-title {
+  font-size: 0.875rem !important;
+}
+
+/* Botão Ver evento no card lateral: 12px */
+.events-page .events-day-item .button {
+  font-size: 0.75rem !important;
+  padding: 0.3rem 0.6rem !important;
+}
+
+/* 5. CARDS DE PRÓXIMOS EVENTOS — compactar */
+
+/* Imagem: 180px fixo */
+.events-page .events-card .product-media {
+  height: 180px !important;
+  max-height: 180px !important;
+  aspect-ratio: unset !important;
+  object-fit: cover !important;
+}
+
+/* Título: 14px / weight 600 */
+.events-page .events-card .events-event-title {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+}
+
+/* Descrição: 12px, 2 linhas */
+.events-page .events-card .muted {
+  font-size: 0.75rem !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+/* Meta: 11px */
+.events-page .events-card .events-meta-list {
+  font-size: 0.6875rem !important;
+  gap: 0.22rem !important;
+}
+
+/* Badges: 10px */
+.events-page .events-card .pill {
+  font-size: 0.625rem !important;
+  padding: 0.14rem 0.4rem !important;
+}
+
+/* Botão Ver evento nos cards: 12px */
+.events-page .events-card .button {
+  font-size: 0.75rem !important;
+  padding: 6px 14px !important;
+}
+
+.events-page .events-card .product-body {
+  gap: 0.36rem !important;
+  padding: 0.56rem !important;
+}
+
+/* 6. FILTROS — leve redução */
+
+.events-page .filters .chip {
+  font-size: 0.8125rem !important;
+  padding: 0.375rem 0.875rem !important;
+}
+
+/* ============================================================
+   17. ADMIN COMPACTION
+   ============================================================ */
+
+/* Dashboard: stat-grid 4 colunas */
+.admin-main-shell .stat-grid {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+/* Textareas compactadas no admin */
+.admin-main-shell .textarea {
+  min-height: 64px !important;
+  height: 64px !important;
+}
+
+/* Canais de contato: grid 2 colunas */
+.admin-contact-channels-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* Campos internos do canal: 2 colunas */
+.admin-contact-channel-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .admin-contact-channels-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-contact-channel-fields {
+    grid-template-columns: 1fr;
+  }
+  .admin-main-shell .stat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ============================================================
+   EASTER EGGS
+   ============================================================ */
+
+.mascote-cursor,
+.mascote-cursor * {
+  cursor: url('/cursors/cifrao.svg') 12 12, auto !important;
+}
+
+@keyframes ee-timer-shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* ============================================================
+   18. GOVERNANCE PAGE — melhorias visuais
+   ============================================================ */
+
+/* 1. HERO — fundo escuro */
+
+.governance-page .governance-hero {
+  background: #0d1117;
+  border-radius: 16px;
+  margin-top: 1rem;
+}
+
+.governance-page .governance-hero .kicker {
+  color: #c0392b !important;
+}
+
+.governance-page .governance-hero-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.governance-page .governance-hero-subtitle,
+.governance-page .governance-hero-text {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.governance-page .governance-brand-card {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.governance-page .governance-brand-card strong,
+.governance-page .governance-brand-card span {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.governance-page .governance-hero-term {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.governance-page .governance-hero-term strong {
+  color: #ffffff !important;
+}
+
+.governance-page .governance-hero-term span {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 2. MEMBER CARDS */
+
+.governance-page .governance-member-card {
+  border-radius: 12px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.governance-page .governance-member-card:hover {
+  border-color: #c0392b !important;
+  box-shadow: 0 4px 20px rgba(192, 57, 43, 0.12);
+}
+
+.governance-member-avatar {
+  background: #1a3a5c !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.governance-page .governance-member-copy .pill {
+  background: #c0392b !important;
+  color: #ffffff !important;
+}
+
+.governance-page .governance-member-copy h3 {
+  font-weight: 700 !important;
+  font-size: 1.0625rem !important;
+}
+
+.governance-page .governance-inline-link {
+  color: #c0392b !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+/* 3. ROLE CARDS */
+
+.governance-page .governance-role-card {
+  transition: border-left 0.15s ease, box-shadow 0.15s ease;
+}
+
+.governance-page .governance-role-card:hover {
+  border-left: 3px solid #c0392b !important;
+}
+
+.governance-page .governance-role-card .governance-card-icon {
+  color: #c0392b !important;
+}
+
+.governance-page .governance-role-card h3 {
+  font-weight: 600 !important;
+}
+
+/* 4. TERM — barra de progresso e datas */
+
+.governance-page .governance-term-card .pill-accent {
+  background: #c0392b !important;
+  color: #ffffff !important;
+}
+
+.governance-term-progress {
+  margin-top: 1rem;
+}
+
+.governance-term-progress-label {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-bottom: 0.375rem;
+}
+
+.governance-term-progress-bar-track {
+  background: #e5e7eb;
+  border-radius: 99px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.governance-term-progress-bar-fill {
+  height: 100%;
+  background: #c0392b;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.governance-page .governance-term-meta > div {
+  background: #f8f9fa !important;
+  border-left: 3px solid #1a3a5c !important;
+  padding-left: 0.75rem;
+}
+
+/* 5. COMMITMENTS */
+
+.governance-commitment-icon {
+  display: flex;
+  margin-bottom: 0.625rem;
+}
+
+.governance-page .governance-commitment-card:nth-child(1),
+.governance-page .governance-commitment-card:nth-child(2) {
+  border-top: 3px solid #1a3a5c !important;
+}
+
+.governance-page .governance-commitment-card:nth-child(3),
+.governance-page .governance-commitment-card:nth-child(4) {
+  border-top: 3px solid #c0392b !important;
+}
+
+/* 6. DOCUMENTS */
+
+.governance-page .governance-document-copy .badge-row .pill:first-child {
+  background: #1a3a5c !important;
+  color: #ffffff !important;
+}
+
+.governance-page .governance-document-card + .governance-document-card {
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.governance-page .governance-document-link {
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+}
+
+.governance-page .governance-document-link:hover {
+  background: #a93226 !important;
+  color: #ffffff !important;
+  border-color: #a93226 !important;
+}
+
+/* 7. CONTACT — cor por canal */
+
+.governance-page .governance-contact-card-email {
+  border-top: 3px solid #1a3a5c !important;
+}
+
+.governance-page .governance-contact-card-email .governance-card-icon {
+  color: #1a3a5c !important;
+}
+
+.governance-page .governance-contact-card-instagram {
+  border-top: 3px solid #e1306c !important;
+}
+
+.governance-page .governance-contact-card-instagram .governance-card-icon {
+  color: #e1306c !important;
+}
+
+.governance-page .governance-contact-card-whatsapp {
+  border-top: 3px solid #25d366 !important;
+}
+
+.governance-page .governance-contact-card-whatsapp .governance-card-icon {
+  color: #25d366 !important;
+}

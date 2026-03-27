@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l \"/c/Users/castr/OneDrive/Área de Trabalho/Ciência de Dados/Logica de Programação/Site Atlética/src/lib\"/*.ts)",
+      "Bash(npm run:*)"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="magnatasGradient" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0d4aa5" />
+      <stop offset="1" stop-color="#cc1f3d" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#magnatasGradient)" />
+  <text x="32" y="40" text-anchor="middle" fill="#ffffff" font-size="28" font-family="Georgia, serif" font-weight="700">M</text>
+</svg>
