@@ -3,11 +3,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type PropsWithChildren,
   type SetStateAction,
 } from 'react';
+
+const POLL_SKIP_AFTER_WRITE_MS = 10_000;
 import { getSupabaseConfig, setSupabaseConfig, supabase } from './supabase';
 import { PRODUCT_CATEGORIES } from './productConstants';
 import { cloneProductList, sampleProducts } from './sampleProducts';
@@ -274,6 +277,15 @@ function getDefaultProducts() {
   return normalizeProductOrder(cloneProductList(sampleProducts));
 }
 
+function normalizeCloudProducts(cloudData: unknown[]): Product[] {
+  const defaults = getDefaultProducts();
+  const normalized = cloudData.map((item, index) => {
+    const fallback = defaults[index] || createFallbackProduct(index);
+    return normalizeProduct(item, fallback, index);
+  });
+  return normalizeProductOrder(normalized);
+}
+
 function persistProducts(products: Product[]) {
   if (typeof window !== 'undefined') {
     try {
@@ -387,6 +399,7 @@ export function ProductCatalogProvider({ children }: PropsWithChildren) {
   const [products, setProducts] = useState<Product[]>(() =>
     supabase ? getDefaultProducts() : loadProducts()
   );
+  const lastSavedAt = useRef(0);
 
   useEffect(() => {
     if (!supabase) return;
@@ -403,13 +416,7 @@ export function ProductCatalogProvider({ children }: PropsWithChildren) {
         if (cancelled) return;
         clearTimeout(timeoutId);
         if (cloudData && Array.isArray(cloudData)) {
-          const defaults = getDefaultProducts();
-          const normalized = normalizeProductOrder(
-            cloudData.map((item, index) => {
-              const fallback = defaults[index] || createFallbackProduct(index);
-              return normalizeProduct(item, fallback, index);
-            })
-          );
+          const normalized = normalizeCloudProducts(cloudData);
           try {
             if (typeof window !== 'undefined') {
               window.localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(normalized));
@@ -437,30 +444,28 @@ export function ProductCatalogProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!supabase) return;
     const intervalId = setInterval(() => {
+      if (Date.now() - lastSavedAt.current < POLL_SKIP_AFTER_WRITE_MS) return;
       getSupabaseConfig<Product[]>(PRODUCT_STORAGE_KEY).then((cloudData) => {
         if (!cloudData || !Array.isArray(cloudData)) return;
-        const defaults = getDefaultProducts();
-        const normalized = normalizeProductOrder(
-          cloudData.map((item, index) => {
-            const fallback = defaults[index] || createFallbackProduct(index);
-            return normalizeProduct(item, fallback, index);
-          })
-        );
-        setProducts(normalized);
+        setProducts(normalizeCloudProducts(cloudData));
       });
     }, 30000);
     return () => clearInterval(intervalId);
   }, []);
 
+  function saveProducts(updater: (current: Product[]) => Product[]) {
+    lastSavedAt.current = Date.now();
+    updateAndPersist(setProducts, updater);
+  }
+
   function createProduct(draft: ProductDraft) {
     const newProduct = createProductFromDraft(draft, products);
-
-    updateAndPersist(setProducts, (currentProducts) => [...currentProducts, newProduct]);
+    saveProducts((currentProducts) => [...currentProducts, newProduct]);
     return newProduct;
   }
 
   function updateProduct(productId: string, patch: Partial<ProductDraft>) {
-    updateAndPersist(setProducts, (currentProducts) =>
+    saveProducts((currentProducts) =>
       currentProducts.map((product, index) =>
         product.id === productId ? patchProduct(product, patch, index) : product
       )
@@ -468,13 +473,13 @@ export function ProductCatalogProvider({ children }: PropsWithChildren) {
   }
 
   function deleteProduct(productId: string) {
-    updateAndPersist(setProducts, (currentProducts) =>
+    saveProducts((currentProducts) =>
       currentProducts.filter((product) => product.id !== productId)
     );
   }
 
   function toggleProductActive(productId: string) {
-    updateAndPersist(setProducts, (currentProducts) =>
+    saveProducts((currentProducts) =>
       currentProducts.map((product) =>
         product.id === productId ? { ...product, isActive: !product.isActive } : product
       )
@@ -482,7 +487,7 @@ export function ProductCatalogProvider({ children }: PropsWithChildren) {
   }
 
   function moveProduct(productId: string, direction: 'up' | 'down') {
-    updateAndPersist(setProducts, (currentProducts) => {
+    saveProducts((currentProducts) => {
       const orderedProducts = sortProducts(currentProducts);
       const currentIndex = orderedProducts.findIndex((product) => product.id === productId);
 
@@ -503,7 +508,7 @@ export function ProductCatalogProvider({ children }: PropsWithChildren) {
   }
 
   function setProductDisplayOrder(productId: string, displayOrder: number) {
-    updateAndPersist(setProducts, (currentProducts) =>
+    saveProducts((currentProducts) =>
       currentProducts.map((product) =>
         product.id === productId
           ? {
@@ -523,6 +528,7 @@ export function ProductCatalogProvider({ children }: PropsWithChildren) {
     const defaults = getDefaultProducts();
     setProducts(defaults);
     persistProducts(defaults);
+    lastSavedAt.current = Date.now();
   }
 
   const publicProducts = useMemo(

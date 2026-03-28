@@ -1,34 +1,34 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { useBranding } from '../lib/BrandingContext';
-import {
-  ADMIN_DEMO_EMAIL,
-  ADMIN_DEMO_PASSWORD,
-  BLOCKED_DEMO_EMAIL,
-  useAuth,
-} from '../lib/AuthContext';
+import { ADMIN_DEMO_EMAIL, BLOCKED_DEMO_EMAIL, useAuth } from '../lib/AuthContext';
 
 type LoginState = {
   from?: string;
 };
 
 export default function LoginPage() {
-  const { authError, authStatus, loginMessage, signIn, signOut, clearLoginMessage } = useAuth();
+  const { authError, authStatus, loginMessage, signIn, signOut, clearLoginMessage, isDemoMode } =
+    useAuth();
   const { resolvedBranding } = useBranding();
   const location = useLocation();
-  const [email, setEmail] = useState(ADMIN_DEMO_EMAIL);
-  const [password, setPassword] = useState(ADMIN_DEMO_PASSWORD);
+  const [email, setEmail] = useState(isDemoMode ? ADMIN_DEMO_EMAIL : '');
+  const [password, setPassword] = useState('');
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const locationState = location.state as LoginState | null;
   const redirectTo = typeof locationState?.from === 'string' ? locationState.from : '/admin';
-  const statusMessage = authError?.type === 'user_not_registered' ? authError.message : loginMessage;
+  const statusMessage =
+    authError?.type === 'user_not_registered' ? authError.message : loginMessage;
 
   if (authStatus === 'admin') {
     return <Navigate to={redirectTo} replace />;
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    signIn({ email, password });
+    setIsSigningIn(true);
+    await signIn({ email, password });
+    setIsSigningIn(false);
   }
 
   function handleEmailChange(value: string) {
@@ -63,6 +63,7 @@ export default function LoginPage() {
                 autoComplete="username"
                 value={email}
                 onChange={(event) => handleEmailChange(event.target.value)}
+                disabled={isSigningIn}
               />
             </label>
 
@@ -74,13 +75,14 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => handlePasswordChange(event.target.value)}
+                disabled={isSigningIn}
               />
             </label>
           </div>
 
           <div className="button-row">
-            <button type="submit" className="button">
-              Entrar no painel
+            <button type="submit" className="button" disabled={isSigningIn}>
+              {isSigningIn ? 'Entrando...' : 'Entrar no painel'}
             </button>
             <button type="button" className="button button-outline" onClick={signOut}>
               Limpar estado
@@ -91,20 +93,22 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="card admin-preview-card">
-          <p className="kicker">Credenciais demo locais</p>
-          <ul className="check-list">
-            <li>
-              E-mail de acesso: <code>{ADMIN_DEMO_EMAIL}</code>
-            </li>
-            <li>
-              Senha de acesso: <code>{ADMIN_DEMO_PASSWORD}</code>
-            </li>
-            <li>
-              E-mail bloqueado para teste: <code>{BLOCKED_DEMO_EMAIL}</code>
-            </li>
-          </ul>
-        </div>
+        {isDemoMode && (
+          <div className="card admin-preview-card">
+            <p className="kicker">Credenciais demo locais</p>
+            <ul className="check-list">
+              <li>
+                E-mail de acesso: <code>{ADMIN_DEMO_EMAIL}</code>
+              </li>
+              <li>
+                Senha de acesso: <code>Magnatas123</code>
+              </li>
+              <li>
+                E-mail bloqueado para teste: <code>{BLOCKED_DEMO_EMAIL}</code>
+              </li>
+            </ul>
+          </div>
+        )}
       </section>
     </main>
   );

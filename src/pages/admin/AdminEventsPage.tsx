@@ -40,14 +40,12 @@ import {
   formatEventMonthLabel,
   formatEventTimeRange,
   getEventActionConfig,
-  getEventActionLabel,
   getEventCategoryLabel,
   getEventStatusKey,
   getEventStatusLabel,
   mergeEventsPageContent,
   normalizeEventCategoryId,
 } from '../../lib/events';
-import { formatCurrency } from '../../lib/formatCurrency';
 import type {
   EventActionType,
   EventCategoryDefinition,
@@ -75,7 +73,7 @@ const IMPORT_ACCEPT =
 const CATEGORY_DRAFT_PREFIX = 'draft-category-';
 
 type VisibilityFilter = 'all' | 'visible' | 'hidden';
-type EventsTab = 'events' | 'categories' | 'import';
+type EventsTab = 'events' | 'categories' | 'import' | 'page';
 
 function createEventDraftFromRecord(event: EventRecord): EventDraft {
   return {
@@ -384,11 +382,6 @@ export default function AdminEventsPage() {
     JSON.stringify(eventFormState) !== JSON.stringify(selectedEventSnapshot);
   const isCategoryDirty =
     JSON.stringify(categoryFormState) !== JSON.stringify(categories);
-  const currentCategoryLabel = getEventCategoryLabel(eventFormState.categoryId, categories);
-  const liveEventAction = getEventActionConfig(eventFormState);
-  const liveEventStatusKey = getEventStatusKey(eventFormState);
-  const liveEventStatusLabel = getEventStatusLabel(eventFormState);
-  const liveEventActionLabel = getEventActionLabel(eventFormState);
 
   function updateEventField<K extends keyof EventDraft>(field: K, value: EventDraft[K]) {
     setEventFormState((current) => ({
@@ -883,6 +876,22 @@ export default function AdminEventsPage() {
                 <span className="admin-tab-dirty-dot" aria-hidden="true" />
               )}
             </button>
+            <button
+              type="button"
+              role="tab"
+              className={
+                activeTab === 'page'
+                  ? 'admin-products-tab admin-products-tab-active'
+                  : 'admin-products-tab'
+              }
+              aria-selected={activeTab === 'page'}
+              onClick={() => setActiveTab('page')}
+            >
+              Pagina
+              {isPageDirty && (
+                <span className="admin-tab-dirty-dot" aria-hidden="true" />
+              )}
+            </button>
           </div>
 
           {activeTab === 'events' && (
@@ -948,12 +957,6 @@ export default function AdminEventsPage() {
                   </label>
                 </div>
 
-                <div className="button-row admin-products-header-actions">
-                  <button type="button" className="button" onClick={openNewEventEditor}>
-                    <Plus size={16} />
-                    Novo evento
-                  </button>
-                </div>
               </header>
 
               <div className="admin-table-wrap admin-products-table-wrap admin-events-table-wrap">
@@ -1339,17 +1342,13 @@ export default function AdminEventsPage() {
               )}
             </div>
           )}
-        </article>
-      <article className="card admin-subcard">
+
+          {activeTab === 'page' && (
+            <div className="admin-events-tab-panel">
         <div className="page-header page-header-stack">
           <div>
-            <p className="kicker">Pagina publica de eventos</p>
-            <h3 className="section-title">Textos, banner e secoes da rota /eventos.</h3>
-            <p className="muted">
-              Esta configuracao controla o hero, os textos auxiliares, a mensagem de estado vazio
-              e a visibilidade das secoes do calendario publico. A tipografia global desta pagina
-              agora e herdada de <strong>Aparencia</strong>.
-            </p>
+            <p className="kicker">Pagina publica</p>
+            <h3 className="section-title">Textos, banner e secoes de /eventos.</h3>
           </div>
         </div>
 
@@ -1652,7 +1651,9 @@ export default function AdminEventsPage() {
             </button>
           </div>
         </form>
-      </article>
+            </div>
+          )}
+        </article>
       </section>
 
       {isEditorOpen && (
@@ -1966,60 +1967,6 @@ export default function AdminEventsPage() {
                     }
                   />
 
-                  <div className="admin-events-preview-card">
-                    <div className="admin-events-preview-grid">
-                      {eventFormState.imageUrl ? (
-                        <img
-                          src={eventFormState.imageUrl}
-                          alt={eventFormState.title || 'Preview do evento'}
-                          className="admin-events-preview-image"
-                        />
-                      ) : (
-                        <div className="admin-event-thumb-placeholder admin-events-preview-placeholder">
-                          <CalendarDays size={24} />
-                        </div>
-                      )}
-
-                      <div className="admin-events-preview-copy">
-                        <div className="badge-row">
-                          <span className="pill">{currentCategoryLabel}</span>
-                          <span className={`pill event-status-pill event-status-pill-${liveEventStatusKey}`}>
-                            {liveEventStatusLabel}
-                          </span>
-                          {eventFormState.featured ? <span className="pill">Destaque</span> : null}
-                        </div>
-                        <h4>{eventFormState.title || 'Titulo do evento'}</h4>
-                        {eventFormState.shortDescription ? (
-                          <p className="muted">{eventFormState.shortDescription}</p>
-                        ) : null}
-                        <div className="events-meta-list">
-                          {eventFormState.date ? (
-                            <span>
-                              <CalendarDays size={16} />
-                              {formatEventDateLabel(eventFormState.date)}
-                            </span>
-                          ) : null}
-                          {eventFormState.startTime ? <span>{formatEventTimeRange(eventFormState)}</span> : null}
-                          {eventFormState.location ? <span>{eventFormState.location}</span> : null}
-                        </div>
-                        {typeof eventFormState.ticketPrice === 'number' && eventFormState.ticketPrice > 0 ? (
-                          <strong className="event-inline-price">
-                            {formatCurrency(eventFormState.ticketPrice)}
-                          </strong>
-                        ) : null}
-                        {selectedEvent ? (
-                          <a
-                            href={`/eventos/${selectedEvent.id}`}
-                            className="button button-outline"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Ver pagina publica
-                          </a>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
                 </section>
               </div>
 

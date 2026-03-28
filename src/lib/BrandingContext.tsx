@@ -3,9 +3,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react';
+
+const POLL_SKIP_AFTER_WRITE_MS = 10_000;
 import { mixHexColors, rgbaFromHex } from './colorUtils';
 import {
   clearStoredBrandingConfig,
@@ -89,6 +92,7 @@ export function BrandingProvider({ children }: PropsWithChildren) {
   const [branding, setBranding] = useState<BrandingConfig>(() =>
     supabase ? defaultBrandingConfig : loadBrandingConfig()
   );
+  const lastSavedAt = useRef(0);
 
   const resolvedBranding = useMemo(() => resolveBrandingConfig(branding), [branding]);
 
@@ -129,6 +133,7 @@ export function BrandingProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!supabase) return;
     const intervalId = setInterval(() => {
+      if (Date.now() - lastSavedAt.current < POLL_SKIP_AFTER_WRITE_MS) return;
       syncBrandingFromSupabase().then((data) => {
         if (data) setBranding(data);
       });
@@ -139,6 +144,7 @@ export function BrandingProvider({ children }: PropsWithChildren) {
   function saveBranding(nextBranding: BrandingConfig) {
     const persistedBranding = persistBrandingConfig(nextBranding);
     setBranding(persistedBranding);
+    lastSavedAt.current = Date.now();
     return persistedBranding;
   }
 

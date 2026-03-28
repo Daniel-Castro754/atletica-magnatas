@@ -15,7 +15,13 @@ import type { OrderStatus } from '../../types/order';
 type OrderStatusFilter = 'all' | OrderStatus;
 
 export default function AdminOrdersPage() {
-  const { orders, updateOrderStatus } = useOrders();
+  const { orders, updateOrderStatus, refreshOrders } = useOrders();
+
+  // Re-sincroniza do Supabase ao montar: o admin já está autenticado neste ponto,
+  // portanto a leitura da tabela `orders` (protegida por RLS) deve ter sucesso.
+  useEffect(() => {
+    void refreshOrders();
+  }, []);
   const [activeStatus, setActiveStatus] = useState<OrderStatusFilter>('all');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(orders[0]?.id ?? null);
   const [statusDraft, setStatusDraft] = useState<OrderStatus>('pedido_enviado');

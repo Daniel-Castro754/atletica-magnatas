@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
+
+const POLL_SKIP_AFTER_WRITE_MS = 10_000;
 import {
   clearStoredEventsConfig,
   cloneEventCategories,
@@ -56,6 +58,7 @@ export function EventsProvider({ children }: PropsWithChildren) {
   const [config, setConfig] = useState<EventsConfig>(() =>
     supabase ? defaultEventsConfig : loadEventsConfig()
   );
+  const lastSavedAt = useRef(0);
 
   useEffect(() => {
     if (!supabase) return;
@@ -90,6 +93,7 @@ export function EventsProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!supabase) return;
     const intervalId = setInterval(() => {
+      if (Date.now() - lastSavedAt.current < POLL_SKIP_AFTER_WRITE_MS) return;
       syncEventsFromSupabase().then((data) => {
         if (data) setConfig(data);
       });
@@ -100,6 +104,7 @@ export function EventsProvider({ children }: PropsWithChildren) {
   function saveConfig(nextConfig: EventsConfig) {
     const persistedConfig = persistNextConfig(nextConfig);
     setConfig(persistedConfig);
+    lastSavedAt.current = Date.now();
     return persistedConfig;
   }
 

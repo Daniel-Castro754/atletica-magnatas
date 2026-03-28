@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 
 describe('AuthService.validate', () => {
   it('deve retornar success com credenciais corretas', () => {
-    const result = AuthService.validate(AuthService.ADMIN_EMAIL, AuthService.ADMIN_PASSWORD);
+    const result = AuthService.validate(AuthService.ADMIN_EMAIL, AuthService.DEV_ADMIN_PASSWORD);
     expect(result).toBe('success');
   });
 
@@ -13,7 +13,7 @@ describe('AuthService.validate', () => {
   });
 
   it('deve retornar invalid_credentials com email errado', () => {
-    const result = AuthService.validate('outro@email.com', AuthService.ADMIN_PASSWORD);
+    const result = AuthService.validate('outro@email.com', AuthService.DEV_ADMIN_PASSWORD);
     expect(result).toBe('invalid_credentials');
   });
 
@@ -25,7 +25,7 @@ describe('AuthService.validate', () => {
   it('deve normalizar email (case insensitive e trim)', () => {
     const result = AuthService.validate(
       `  ${AuthService.ADMIN_EMAIL.toUpperCase()}  `,
-      AuthService.ADMIN_PASSWORD
+      AuthService.DEV_ADMIN_PASSWORD
     );
     expect(result).toBe('success');
   });

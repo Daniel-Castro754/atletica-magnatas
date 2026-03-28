@@ -20,6 +20,8 @@ type OrdersContextValue = {
   submitOrder: (draft: SubmitOrderDraft, cart: CartItem[], pathname: string) => SubmittedOrder;
   updateOrderStatus: (orderId: string, nextStatus: OrderStatus, note?: string) => void;
   clearOrders: () => void;
+  /** Re-sincroniza pedidos do Supabase. Útil após login do admin. */
+  refreshOrders: () => Promise<void>;
   isInitialized: boolean;
 };
 
@@ -97,6 +99,10 @@ export function OrdersProvider({ children }: PropsWithChildren) {
       clearOrders() {
         clearStoredOrders();
         setOrders([]);
+      },
+      async refreshOrders() {
+        const cloudOrders = await syncOrdersFromSupabase();
+        if (cloudOrders !== null) setOrders(cloudOrders);
       },
     }),
     [trackPedidoEnviado]

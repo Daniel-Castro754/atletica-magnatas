@@ -1,5 +1,7 @@
 import type { CartItem } from '../types/cart';
-import { getSupabaseConfig, setSupabaseConfig } from './supabase';
+import { supabase } from './supabase';
+
+const DEV = import.meta.env.DEV;
 import type {
   LegacySubmittedOrder,
   OrderItem,
@@ -491,33 +493,63 @@ export function persistOrders(orders: SubmittedOrder[]) {
         version: 2,
         orders: normalizedOrders,
       };
-
       window.localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(payload));
     } catch {
       return normalizedOrders;
     }
   }
 
-  const supabasePayload: OrdersStoragePayload = { version: 2, orders: normalizedOrders };
-  setSupabaseConfig(ORDER_STORAGE_KEY, supabasePayload);
+  // Persistência em tabela dedicada `orders` (uma linha por pedido).
+  // INSERT/UPSERT é permitido para usuários anônimos; leitura e update requerem auth.
+  if (supabase) {
+    const rows = normalizedOrders.map((order) => ({
+      id: order.id,
+      data: order as unknown as Record<string, unknown>,
+      created_at: order.createdAt,
+      updated_at: order.updatedAt,
+    }));
+
+    void Promise.resolve(supabase.from('orders').upsert(rows)).then(
+      ({ error }: { error: unknown }) => {
+        if (error && DEV) console.warn('[orders] persistOrders erro Supabase:', error);
+      },
+      (err: unknown) => {
+        if (DEV) console.warn('[orders] persistOrders exceção Supabase:', err);
+      }
+    );
+  }
+
   return normalizedOrders;
 }
 
 export async function syncOrdersFromSupabase(): Promise<SubmittedOrder[] | null> {
-  const cloudData = await getSupabaseConfig<OrdersStoragePayload>(ORDER_STORAGE_KEY);
-  if (!cloudData) return null;
-  const ordersSource = isStoragePayload(cloudData) ? cloudData.orders : [];
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('orders')
+    .select('data')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    if (DEV) console.warn('[orders] syncOrdersFromSupabase erro:', error);
+    return null;
+  }
+
+  if (!data?.length) return [];
+
   const normalized = sortOrders(
-    ordersSource
-      .map((order) => normalizeSubmittedOrder(order))
+    (data as Array<{ data: unknown }>)
+      .map((row) => normalizeSubmittedOrder(row.data))
       .filter((order): order is SubmittedOrder => Boolean(order))
   );
+
   try {
     if (typeof window !== 'undefined') {
       const payload: OrdersStoragePayload = { version: 2, orders: normalized };
       window.localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(payload));
     }
   } catch {}
+
   return normalized;
 }
 

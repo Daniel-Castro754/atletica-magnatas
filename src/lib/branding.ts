@@ -4,7 +4,7 @@ import {
   mergeBrandingTypographyMap,
 } from './brandingTypography';
 import type { BrandingConfig, BrandingColors, ResolvedBrandingConfig } from '../types/branding';
-import { getSupabaseConfig, setSupabaseConfig } from './supabase';
+import { setSupabaseConfig, syncConfigFromSupabase } from './supabase';
 
 export const BRANDING_STORAGE_KEY = 'magnatas_branding_config';
 
@@ -193,18 +193,13 @@ export function persistBrandingConfig(config: BrandingConfig) {
 }
 
 export async function syncBrandingFromSupabase(): Promise<BrandingConfig | null> {
-  const cloudData = await getSupabaseConfig<Partial<BrandingConfig>>(BRANDING_STORAGE_KEY);
-  if (!cloudData) return null;
-  if (cloudData.colors?.background === '#ffccd5') {
-    cloudData.colors.background = DEFAULT_COLORS.background;
-  }
-  const merged = mergeBrandingConfig(cloudData);
-  try {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(BRANDING_STORAGE_KEY, JSON.stringify(merged));
+  return syncConfigFromSupabase(BRANDING_STORAGE_KEY, (raw) => {
+    const input = raw as Partial<BrandingConfig>;
+    if (input?.colors?.background === '#ffccd5') {
+      input.colors.background = DEFAULT_COLORS.background;
     }
-  } catch {}
-  return merged;
+    return mergeBrandingConfig(input);
+  });
 }
 
 export function clearStoredBrandingConfig() {
