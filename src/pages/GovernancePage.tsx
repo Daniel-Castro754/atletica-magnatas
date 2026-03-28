@@ -121,7 +121,6 @@ export default function GovernancePage() {
         return (
           <section key={sectionId} className="container governance-hero">
             <div className="governance-hero-copy">
-              {hasVisibleValue(content.heroKicker) && <p className="kicker">{content.heroKicker}</p>}
               <h1 className={tx('title', 'governance-hero-title')}>{content.title}</h1>
               {hasVisibleValue(content.subtitle) && (
                 <p className={tx('subtitle', 'governance-hero-subtitle')}>{content.subtitle}</p>

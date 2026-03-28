@@ -1,11 +1,12 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type PropsWithChildren,
 } from 'react';
-import { clearStoredSiteContent, defaultSiteContent, loadSiteContent, persistSiteContent } from './siteContent';
+import { clearStoredSiteContent, defaultSiteContent, loadSiteContent, persistSiteContent, syncSiteContentFromSupabase } from './siteContent';
 import type { SiteContentConfig } from '../types/siteContent';
 
 type SiteContentContextValue = {
@@ -19,6 +20,12 @@ const SiteContentContext = createContext<SiteContentContextValue | null>(null);
 
 export function SiteContentProvider({ children }: PropsWithChildren) {
   const [content, setContent] = useState<SiteContentConfig>(loadSiteContent);
+
+  useEffect(() => {
+    syncSiteContentFromSupabase().then((cloudContent) => {
+      if (cloudContent) setContent(cloudContent);
+    });
+  }, []);
 
   function saveContent(nextContent: SiteContentConfig) {
     const persistedContent = persistSiteContent(nextContent);

@@ -9,6 +9,7 @@ import type {
   GovernanceSectionId,
   GovernanceTerm,
 } from '../types/governance';
+import { getSupabaseConfig, setSupabaseConfig } from './supabase';
 
 export const GOVERNANCE_STORAGE_KEY = 'magnatas_governance_content';
 
@@ -558,7 +559,20 @@ export function persistGovernanceContent(content: GovernanceContent) {
     }
   }
 
+  setSupabaseConfig(GOVERNANCE_STORAGE_KEY, mergedContent);
   return mergedContent;
+}
+
+export async function syncGovernanceFromSupabase(): Promise<GovernanceContent | null> {
+  const cloudData = await getSupabaseConfig<Partial<GovernanceContent>>(GOVERNANCE_STORAGE_KEY);
+  if (!cloudData) return null;
+  const merged = mergeGovernanceContent(cloudData);
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(GOVERNANCE_STORAGE_KEY, JSON.stringify(merged));
+    }
+  } catch {}
+  return merged;
 }
 
 export function clearStoredGovernanceContent() {

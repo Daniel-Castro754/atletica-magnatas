@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import {
   clearStoredEventsConfig,
   cloneEventCategories,
@@ -11,6 +11,7 @@ import {
   mergeEventsConfig,
   patchEventRecord,
   persistEventsConfig,
+  syncEventsFromSupabase,
 } from './events';
 import type {
   EventCategoryDefinition,
@@ -48,6 +49,12 @@ function persistNextConfig(config: EventsConfig) {
 
 export function EventsProvider({ children }: PropsWithChildren) {
   const [config, setConfig] = useState<EventsConfig>(loadEventsConfig);
+
+  useEffect(() => {
+    syncEventsFromSupabase().then((cloudConfig) => {
+      if (cloudConfig) setConfig(cloudConfig);
+    });
+  }, []);
 
   function saveConfig(nextConfig: EventsConfig) {
     const persistedConfig = persistNextConfig(nextConfig);

@@ -874,6 +874,13 @@ body {
   background: #0d1117;
   border-radius: 16px;
   margin-top: 1rem;
+  padding: 48px 56px !important;
+}
+
+@media (max-width: 640px) {
+  .governance-page .governance-hero {
+    padding: 32px 24px !important;
+  }
 }
 
 .governance-page .governance-hero .kicker {

@@ -1,4 +1,5 @@
 import type { CartItem } from '../types/cart';
+import { getSupabaseConfig, setSupabaseConfig } from './supabase';
 import type {
   LegacySubmittedOrder,
   OrderItem,
@@ -497,7 +498,27 @@ export function persistOrders(orders: SubmittedOrder[]) {
     }
   }
 
+  const supabasePayload: OrdersStoragePayload = { version: 2, orders: normalizedOrders };
+  setSupabaseConfig(ORDER_STORAGE_KEY, supabasePayload);
   return normalizedOrders;
+}
+
+export async function syncOrdersFromSupabase(): Promise<SubmittedOrder[] | null> {
+  const cloudData = await getSupabaseConfig<OrdersStoragePayload>(ORDER_STORAGE_KEY);
+  if (!cloudData) return null;
+  const ordersSource = isStoragePayload(cloudData) ? cloudData.orders : [];
+  const normalized = sortOrders(
+    ordersSource
+      .map((order) => normalizeSubmittedOrder(order))
+      .filter((order): order is SubmittedOrder => Boolean(order))
+  );
+  try {
+    if (typeof window !== 'undefined') {
+      const payload: OrdersStoragePayload = { version: 2, orders: normalized };
+      window.localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(payload));
+    }
+  } catch {}
+  return normalized;
 }
 
 export function clearStoredOrders() {

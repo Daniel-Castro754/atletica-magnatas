@@ -8,6 +8,7 @@ import type {
   EventsConfig,
   EventsPageContent,
 } from '../types/events';
+import { getSupabaseConfig, setSupabaseConfig } from './supabase';
 import {
   DEFAULT_EVENTS_TYPOGRAPHY,
   cloneEventsTypographyMap,
@@ -677,7 +678,20 @@ export function persistEventsConfig(config: EventsConfig) {
     }
   }
 
+  setSupabaseConfig(EVENTS_STORAGE_KEY, mergedConfig);
   return mergedConfig;
+}
+
+export async function syncEventsFromSupabase(): Promise<EventsConfig | null> {
+  const cloudData = await getSupabaseConfig<Partial<EventsConfig>>(EVENTS_STORAGE_KEY);
+  if (!cloudData) return null;
+  const merged = mergeEventsConfig(cloudData);
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(merged));
+    }
+  } catch {}
+  return merged;
 }
 
 export function clearStoredEventsConfig() {

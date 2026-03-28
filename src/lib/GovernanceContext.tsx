@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type PropsWithChildren,
@@ -10,6 +11,7 @@ import {
   defaultGovernanceContent,
   loadGovernanceContent,
   persistGovernanceContent,
+  syncGovernanceFromSupabase,
 } from './governance';
 import type { GovernanceContent } from '../types/governance';
 
@@ -24,6 +26,12 @@ const GovernanceContext = createContext<GovernanceContextValue | null>(null);
 
 export function GovernanceProvider({ children }: PropsWithChildren) {
   const [content, setContent] = useState<GovernanceContent>(loadGovernanceContent);
+
+  useEffect(() => {
+    syncGovernanceFromSupabase().then((cloudContent) => {
+      if (cloudContent) setContent(cloudContent);
+    });
+  }, []);
 
   function saveContent(nextContent: GovernanceContent) {
     const persistedContent = persistGovernanceContent(nextContent);

@@ -14,6 +14,7 @@ import {
   mergeBrandingConfig,
   persistBrandingConfig,
   resolveBrandingConfig,
+  syncBrandingFromSupabase,
 } from './branding';
 import type { BrandingConfig, ResolvedBrandingConfig } from '../types/branding';
 
@@ -87,6 +88,12 @@ export function BrandingProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     applyBrandingToDocument(resolvedBranding);
   }, [resolvedBranding]);
+
+  useEffect(() => {
+    syncBrandingFromSupabase().then((cloudBranding) => {
+      if (cloudBranding) setBranding(cloudBranding);
+    });
+  }, []);
 
   function saveBranding(nextBranding: BrandingConfig) {
     const persistedBranding = persistBrandingConfig(nextBranding);

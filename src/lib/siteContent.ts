@@ -1,4 +1,5 @@
 import { sampleProducts } from './sampleProducts';
+import { getSupabaseConfig, setSupabaseConfig } from './supabase';
 import {
   DEFAULT_HOME_TYPOGRAPHY,
   DEFAULT_MAGNATAS_TYPOGRAPHY,
@@ -962,7 +963,20 @@ export function persistSiteContent(content: SiteContentConfig) {
     }
   }
 
+  setSupabaseConfig(SITE_CONTENT_STORAGE_KEY, mergedContent);
   return mergedContent;
+}
+
+export async function syncSiteContentFromSupabase(): Promise<SiteContentConfig | null> {
+  const cloudData = await getSupabaseConfig<Partial<SiteContentConfig>>(SITE_CONTENT_STORAGE_KEY);
+  if (!cloudData) return null;
+  const merged = mergeSiteContent(cloudData);
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(SITE_CONTENT_STORAGE_KEY, JSON.stringify(merged));
+    }
+  } catch {}
+  return merged;
 }
 
 export function clearStoredSiteContent() {

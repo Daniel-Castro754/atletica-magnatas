@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { useAnalytics } from './AnalyticsContext';
 import {
   clearStoredOrders,
@@ -6,6 +6,7 @@ import {
   loadOrders,
   ORDER_STATUSES,
   persistOrders,
+  syncOrdersFromSupabase,
   updateSubmittedOrderStatus,
 } from './orders';
 import type { CartItem } from '../types/cart';
@@ -23,6 +24,12 @@ const OrdersContext = createContext<OrdersContextValue | null>(null);
 export function OrdersProvider({ children }: PropsWithChildren) {
   const { trackPedidoEnviado } = useAnalytics();
   const [orders, setOrders] = useState<SubmittedOrder[]>(loadOrders);
+
+  useEffect(() => {
+    syncOrdersFromSupabase().then((cloudOrders) => {
+      if (cloudOrders) setOrders(cloudOrders);
+    });
+  }, []);
 
   const actions = useMemo(
     () => ({

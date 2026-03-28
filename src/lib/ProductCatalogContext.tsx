@@ -1,12 +1,14 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type Dispatch,
   type PropsWithChildren,
   type SetStateAction,
 } from 'react';
+import { getSupabaseConfig, setSupabaseConfig } from './supabase';
 import { PRODUCT_CATEGORIES } from './productConstants';
 import { cloneProductList, sampleProducts } from './sampleProducts';
 import type { Product, ProductCategory } from '../types/cart';
@@ -277,6 +279,7 @@ function persistProducts(products: Product[]) {
       return;
     }
   }
+  setSupabaseConfig(PRODUCT_STORAGE_KEY, products);
 }
 
 function loadProducts() {
@@ -378,6 +381,25 @@ export function getProductStockStatus(stock: number): ProductStockStatus {
 
 export function ProductCatalogProvider({ children }: PropsWithChildren) {
   const [products, setProducts] = useState<Product[]>(loadProducts);
+
+  useEffect(() => {
+    getSupabaseConfig<Product[]>(PRODUCT_STORAGE_KEY).then((cloudData) => {
+      if (!cloudData || !Array.isArray(cloudData)) return;
+      const defaults = getDefaultProducts();
+      const normalized = normalizeProductOrder(
+        cloudData.map((item, index) => {
+          const fallback = defaults[index] || createFallbackProduct(index);
+          return normalizeProduct(item, fallback, index);
+        })
+      );
+      try {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(normalized));
+        }
+      } catch {}
+      setProducts(normalized);
+    });
+  }, []);
 
   function createProduct(draft: ProductDraft) {
     const newProduct = createProductFromDraft(draft, products);
