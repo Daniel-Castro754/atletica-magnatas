@@ -1,14 +1,14 @@
-import { Suspense, lazy, type ReactNode } from 'react';
+import { Suspense, lazy, type PropsWithChildren, type ReactNode } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import { AnalyticsProvider } from './lib/AnalyticsContext';
 import { AuthProvider } from './lib/AuthContext';
-import { BrandingProvider } from './lib/BrandingContext';
-import { EventsProvider } from './lib/EventsContext';
-import { GovernanceProvider } from './lib/GovernanceContext';
-import { OrdersProvider } from './lib/OrdersContext';
-import { ProductCatalogProvider } from './lib/ProductCatalogContext';
-import { SiteContentProvider } from './lib/SiteContentContext';
+import { useBranding, BrandingProvider } from './lib/BrandingContext';
+import { useEvents, EventsProvider } from './lib/EventsContext';
+import { useGovernance, GovernanceProvider } from './lib/GovernanceContext';
+import { useOrders, OrdersProvider } from './lib/OrdersContext';
+import { useProductCatalog, ProductCatalogProvider } from './lib/ProductCatalogContext';
+import { useSiteContent, SiteContentProvider } from './lib/SiteContentContext';
 import HomePage from './pages/HomePage';
 import ProtectedAdminRoute from './routes/ProtectedAdminRoute';
 
@@ -50,6 +50,29 @@ function RouteLoadingFallback() {
   );
 }
 
+function AppLoadingSkeleton() {
+  return (
+    <div className="app-loading-gate">
+      <div className="app-loading-spinner" />
+    </div>
+  );
+}
+
+function AppReadyGate({ children }: PropsWithChildren) {
+  const { isInitialized: brandingReady } = useBranding();
+  const { isInitialized: contentReady } = useSiteContent();
+  const { isInitialized: eventsReady } = useEvents();
+  const { isInitialized: productsReady } = useProductCatalog();
+  const { isInitialized: governanceReady } = useGovernance();
+  const { isInitialized: ordersReady } = useOrders();
+
+  const isReady =
+    brandingReady && contentReady && eventsReady && productsReady && governanceReady && ordersReady;
+
+  if (!isReady) return <AppLoadingSkeleton />;
+  return <>{children}</>;
+}
+
 function withRouteSuspense(content: ReactNode) {
   return <Suspense fallback={<RouteLoadingFallback />}>{content}</Suspense>;
 }
@@ -64,6 +87,7 @@ export default function App() {
               <AnalyticsProvider>
                 <OrdersProvider>
                   <AuthProvider>
+                    <AppReadyGate>
                     <Routes>
                       <Route element={<AppLayout />}>
                         <Route index element={<HomePage />} />
@@ -136,6 +160,7 @@ export default function App() {
 
                       <Route path="*" element={withRouteSuspense(<NotFoundPage />)} />
                     </Routes>
+                    </AppReadyGate>
                   </AuthProvider>
                 </OrdersProvider>
               </AnalyticsProvider>

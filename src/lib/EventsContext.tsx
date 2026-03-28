@@ -13,6 +13,7 @@ import {
   persistEventsConfig,
   syncEventsFromSupabase,
 } from './events';
+import { supabase } from './supabase';
 import type {
   EventCategoryDefinition,
   EventDraft,
@@ -20,6 +21,8 @@ import type {
   EventsConfig,
   EventsPageContent,
 } from '../types/events';
+
+const CLOUD_TIMEOUT = 4000;
 
 type EventsContextValue = {
   config: EventsConfig;
@@ -39,6 +42,7 @@ type EventsContextValue = {
   savePageSetup: (pageContent: EventsPageContent, categories: EventCategoryDefinition[]) => EventsConfig;
   getEventById: (eventId: string) => EventRecord | null;
   resetEvents: () => EventsConfig;
+  isInitialized: boolean;
 };
 
 const EventsContext = createContext<EventsContextValue | null>(null);
@@ -48,12 +52,49 @@ function persistNextConfig(config: EventsConfig) {
 }
 
 export function EventsProvider({ children }: PropsWithChildren) {
-  const [config, setConfig] = useState<EventsConfig>(loadEventsConfig);
+  const [isInitialized, setIsInitialized] = useState(!supabase);
+  const [config, setConfig] = useState<EventsConfig>(() =>
+    supabase ? defaultEventsConfig : loadEventsConfig()
+  );
 
   useEffect(() => {
-    syncEventsFromSupabase().then((cloudConfig) => {
-      if (cloudConfig) setConfig(cloudConfig);
-    });
+    if (!supabase) return;
+    let cancelled = false;
+
+    const timeoutId = setTimeout(() => {
+      if (cancelled) return;
+      setConfig(loadEventsConfig());
+      setIsInitialized(true);
+    }, CLOUD_TIMEOUT);
+
+    syncEventsFromSupabase()
+      .then((cloudConfig) => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setConfig(cloudConfig ?? loadEventsConfig());
+        setIsInitialized(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setConfig(loadEventsConfig());
+        setIsInitialized(true);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!supabase) return;
+    const intervalId = setInterval(() => {
+      syncEventsFromSupabase().then((data) => {
+        if (data) setConfig(data);
+      });
+    }, 30000);
+    return () => clearInterval(intervalId);
   }, []);
 
   function saveConfig(nextConfig: EventsConfig) {
@@ -166,8 +207,9 @@ export function EventsProvider({ children }: PropsWithChildren) {
       savePageSetup,
       getEventById,
       resetEvents,
+      isInitialized,
     }),
-    [config]
+    [config, isInitialized]
   );
 
   return <EventsContext.Provider value={value}>{children}</EventsContext.Provider>;
@@ -205,6 +247,7 @@ export function EventsPreviewProvider({
       getEventById: (eventId: string) =>
         mergedConfig.events.find((event) => event.id === eventId) ?? null,
       resetEvents: () => defaultEventsConfig,
+      isInitialized: true,
     }),
     [mergedConfig]
   );

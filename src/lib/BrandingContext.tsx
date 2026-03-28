@@ -17,6 +17,9 @@ import {
   syncBrandingFromSupabase,
 } from './branding';
 import type { BrandingConfig, ResolvedBrandingConfig } from '../types/branding';
+import { supabase } from './supabase';
+
+const CLOUD_TIMEOUT = 4000;
 
 type BrandingContextValue = {
   branding: BrandingConfig;
@@ -24,6 +27,7 @@ type BrandingContextValue = {
   saveBranding: (nextBranding: BrandingConfig) => BrandingConfig;
   resetBranding: () => BrandingConfig;
   defaultBranding: BrandingConfig;
+  isInitialized: boolean;
 };
 
 const BrandingContext = createContext<BrandingContextValue | null>(null);
@@ -81,7 +85,10 @@ function applyBrandingToDocument(branding: ResolvedBrandingConfig) {
 }
 
 export function BrandingProvider({ children }: PropsWithChildren) {
-  const [branding, setBranding] = useState<BrandingConfig>(loadBrandingConfig);
+  const [isInitialized, setIsInitialized] = useState(!supabase);
+  const [branding, setBranding] = useState<BrandingConfig>(() =>
+    supabase ? defaultBrandingConfig : loadBrandingConfig()
+  );
 
   const resolvedBranding = useMemo(() => resolveBrandingConfig(branding), [branding]);
 
@@ -90,9 +97,43 @@ export function BrandingProvider({ children }: PropsWithChildren) {
   }, [resolvedBranding]);
 
   useEffect(() => {
-    syncBrandingFromSupabase().then((cloudBranding) => {
-      if (cloudBranding) setBranding(cloudBranding);
-    });
+    if (!supabase) return;
+    let cancelled = false;
+
+    const timeoutId = setTimeout(() => {
+      if (cancelled) return;
+      setBranding(loadBrandingConfig());
+      setIsInitialized(true);
+    }, CLOUD_TIMEOUT);
+
+    syncBrandingFromSupabase()
+      .then((cloudBranding) => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setBranding(cloudBranding ?? loadBrandingConfig());
+        setIsInitialized(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setBranding(loadBrandingConfig());
+        setIsInitialized(true);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!supabase) return;
+    const intervalId = setInterval(() => {
+      syncBrandingFromSupabase().then((data) => {
+        if (data) setBranding(data);
+      });
+    }, 30000);
+    return () => clearInterval(intervalId);
   }, []);
 
   function saveBranding(nextBranding: BrandingConfig) {
@@ -113,6 +154,7 @@ export function BrandingProvider({ children }: PropsWithChildren) {
     saveBranding,
     resetBranding,
     defaultBranding: defaultBrandingConfig,
+    isInitialized,
   };
 
   return <BrandingContext.Provider value={value}>{children}</BrandingContext.Provider>;
@@ -139,6 +181,7 @@ export function BrandingPreviewProvider({
       saveBranding: (nextBranding) => mergeBrandingConfig(nextBranding),
       resetBranding: () => defaultBrandingConfig,
       defaultBranding: defaultBrandingConfig,
+      isInitialized: true,
     }),
     [mergedBranding, resolvedBranding]
   );

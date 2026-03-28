@@ -13,24 +13,55 @@ import {
   persistGovernanceContent,
   syncGovernanceFromSupabase,
 } from './governance';
+import { supabase } from './supabase';
 import type { GovernanceContent } from '../types/governance';
+
+const CLOUD_TIMEOUT = 4000;
 
 type GovernanceContextValue = {
   content: GovernanceContent;
   saveContent: (nextContent: GovernanceContent) => GovernanceContent;
   resetContent: () => GovernanceContent;
   defaultContent: GovernanceContent;
+  isInitialized: boolean;
 };
 
 const GovernanceContext = createContext<GovernanceContextValue | null>(null);
 
 export function GovernanceProvider({ children }: PropsWithChildren) {
-  const [content, setContent] = useState<GovernanceContent>(loadGovernanceContent);
+  const [isInitialized, setIsInitialized] = useState(!supabase);
+  const [content, setContent] = useState<GovernanceContent>(() =>
+    supabase ? defaultGovernanceContent : loadGovernanceContent()
+  );
 
   useEffect(() => {
-    syncGovernanceFromSupabase().then((cloudContent) => {
-      if (cloudContent) setContent(cloudContent);
-    });
+    if (!supabase) return;
+    let cancelled = false;
+
+    const timeoutId = setTimeout(() => {
+      if (cancelled) return;
+      setContent(loadGovernanceContent());
+      setIsInitialized(true);
+    }, CLOUD_TIMEOUT);
+
+    syncGovernanceFromSupabase()
+      .then((cloudContent) => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setContent(cloudContent ?? loadGovernanceContent());
+        setIsInitialized(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setContent(loadGovernanceContent());
+        setIsInitialized(true);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   function saveContent(nextContent: GovernanceContent) {
@@ -51,8 +82,9 @@ export function GovernanceProvider({ children }: PropsWithChildren) {
       saveContent,
       resetContent,
       defaultContent: defaultGovernanceContent,
+      isInitialized,
     }),
-    [content]
+    [content, isInitialized]
   );
 
   return <GovernanceContext.Provider value={value}>{children}</GovernanceContext.Provider>;

@@ -505,14 +505,6 @@ export default function AdminEventsPage() {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Deseja excluir o evento "${targetEvent.title}" da agenda?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     const remainingEvents = events.filter((event) => event.id !== targetEvent.id);
     deleteEvent(targetEvent.id);
 

@@ -9,26 +9,57 @@ import {
   syncOrdersFromSupabase,
   updateSubmittedOrderStatus,
 } from './orders';
+import { supabase } from './supabase';
 import type { CartItem } from '../types/cart';
 import type { OrderStatus, SubmitOrderDraft, SubmittedOrder } from '../types/order';
+
+const CLOUD_TIMEOUT = 4000;
 
 type OrdersContextValue = {
   orders: SubmittedOrder[];
   submitOrder: (draft: SubmitOrderDraft, cart: CartItem[], pathname: string) => SubmittedOrder;
   updateOrderStatus: (orderId: string, nextStatus: OrderStatus, note?: string) => void;
   clearOrders: () => void;
+  isInitialized: boolean;
 };
 
 const OrdersContext = createContext<OrdersContextValue | null>(null);
 
 export function OrdersProvider({ children }: PropsWithChildren) {
   const { trackPedidoEnviado } = useAnalytics();
-  const [orders, setOrders] = useState<SubmittedOrder[]>(loadOrders);
+  const [isInitialized, setIsInitialized] = useState(!supabase);
+  const [orders, setOrders] = useState<SubmittedOrder[]>(() =>
+    supabase ? [] : loadOrders()
+  );
 
   useEffect(() => {
-    syncOrdersFromSupabase().then((cloudOrders) => {
-      if (cloudOrders) setOrders(cloudOrders);
-    });
+    if (!supabase) return;
+    let cancelled = false;
+
+    const timeoutId = setTimeout(() => {
+      if (cancelled) return;
+      setOrders(loadOrders());
+      setIsInitialized(true);
+    }, CLOUD_TIMEOUT);
+
+    syncOrdersFromSupabase()
+      .then((cloudOrders) => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setOrders(cloudOrders ?? loadOrders());
+        setIsInitialized(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setOrders(loadOrders());
+        setIsInitialized(true);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const actions = useMemo(
@@ -74,9 +105,10 @@ export function OrdersProvider({ children }: PropsWithChildren) {
   const value = useMemo(
     () => ({
       orders,
+      isInitialized,
       ...actions,
     }),
-    [actions, orders]
+    [actions, orders, isInitialized]
   );
 
   return <OrdersContext.Provider value={value}>{children}</OrdersContext.Provider>;

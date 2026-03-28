@@ -306,12 +306,6 @@ export default function AdminProductsPage() {
   }
 
   function handleDeleteProduct(product: Product) {
-    const confirmed = window.confirm(`Deseja excluir "${product.name}" do catalogo?`);
-
-    if (!confirmed) {
-      return;
-    }
-
     deleteProduct(product.id);
 
     if (editingProductId === product.id) {

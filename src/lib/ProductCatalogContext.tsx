@@ -8,7 +8,7 @@ import {
   type PropsWithChildren,
   type SetStateAction,
 } from 'react';
-import { getSupabaseConfig, setSupabaseConfig } from './supabase';
+import { getSupabaseConfig, setSupabaseConfig, supabase } from './supabase';
 import { PRODUCT_CATEGORIES } from './productConstants';
 import { cloneProductList, sampleProducts } from './sampleProducts';
 import type { Product, ProductCategory } from '../types/cart';
@@ -65,6 +65,8 @@ export type ProductDraft = {
   highlights: string[];
 };
 
+const CLOUD_TIMEOUT = 4000;
+
 type ProductCatalogContextValue = {
   products: Product[];
   publicProducts: Product[];
@@ -76,6 +78,7 @@ type ProductCatalogContextValue = {
   setProductDisplayOrder: (productId: string, displayOrder: number) => void;
   getProductById: (productId: string) => Product | null;
   resetProducts: () => void;
+  isInitialized: boolean;
 };
 
 const ProductCatalogContext = createContext<ProductCatalogContextValue | null>(null);
@@ -380,25 +383,73 @@ export function getProductStockStatus(stock: number): ProductStockStatus {
 }
 
 export function ProductCatalogProvider({ children }: PropsWithChildren) {
-  const [products, setProducts] = useState<Product[]>(loadProducts);
+  const [isInitialized, setIsInitialized] = useState(!supabase);
+  const [products, setProducts] = useState<Product[]>(() =>
+    supabase ? getDefaultProducts() : loadProducts()
+  );
 
   useEffect(() => {
-    getSupabaseConfig<Product[]>(PRODUCT_STORAGE_KEY).then((cloudData) => {
-      if (!cloudData || !Array.isArray(cloudData)) return;
-      const defaults = getDefaultProducts();
-      const normalized = normalizeProductOrder(
-        cloudData.map((item, index) => {
-          const fallback = defaults[index] || createFallbackProduct(index);
-          return normalizeProduct(item, fallback, index);
-        })
-      );
-      try {
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(normalized));
+    if (!supabase) return;
+    let cancelled = false;
+
+    const timeoutId = setTimeout(() => {
+      if (cancelled) return;
+      setProducts(loadProducts());
+      setIsInitialized(true);
+    }, CLOUD_TIMEOUT);
+
+    getSupabaseConfig<Product[]>(PRODUCT_STORAGE_KEY)
+      .then((cloudData) => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        if (cloudData && Array.isArray(cloudData)) {
+          const defaults = getDefaultProducts();
+          const normalized = normalizeProductOrder(
+            cloudData.map((item, index) => {
+              const fallback = defaults[index] || createFallbackProduct(index);
+              return normalizeProduct(item, fallback, index);
+            })
+          );
+          try {
+            if (typeof window !== 'undefined') {
+              window.localStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(normalized));
+            }
+          } catch {}
+          setProducts(normalized);
+        } else {
+          setProducts(loadProducts());
         }
-      } catch {}
-      setProducts(normalized);
-    });
+        setIsInitialized(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearTimeout(timeoutId);
+        setProducts(loadProducts());
+        setIsInitialized(true);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!supabase) return;
+    const intervalId = setInterval(() => {
+      getSupabaseConfig<Product[]>(PRODUCT_STORAGE_KEY).then((cloudData) => {
+        if (!cloudData || !Array.isArray(cloudData)) return;
+        const defaults = getDefaultProducts();
+        const normalized = normalizeProductOrder(
+          cloudData.map((item, index) => {
+            const fallback = defaults[index] || createFallbackProduct(index);
+            return normalizeProduct(item, fallback, index);
+          })
+        );
+        setProducts(normalized);
+      });
+    }, 30000);
+    return () => clearInterval(intervalId);
   }, []);
 
   function createProduct(draft: ProductDraft) {
@@ -492,8 +543,9 @@ export function ProductCatalogProvider({ children }: PropsWithChildren) {
       setProductDisplayOrder,
       getProductById,
       resetProducts,
+      isInitialized,
     }),
-    [products, publicProducts]
+    [products, publicProducts, isInitialized]
   );
 
   return <ProductCatalogContext.Provider value={value}>{children}</ProductCatalogContext.Provider>;
@@ -519,6 +571,7 @@ export function ProductCatalogPreviewProvider({
       getProductById: (productId: string) =>
         orderedProducts.find((product) => product.id === productId) ?? null,
       resetProducts: () => undefined,
+      isInitialized: true,
     } satisfies ProductCatalogContextValue;
   }, [products]);
 
