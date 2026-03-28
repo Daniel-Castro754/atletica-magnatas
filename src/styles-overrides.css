@@ -1084,3 +1084,21 @@ body {
 .governance-page .governance-contact-card-whatsapp .governance-card-icon {
   color: #25d366 !important;
 }
+
+/* ============================================================
+   19. DOCUMENT UPLOAD — spinner e estados visuais
+   ============================================================ */
+
+@keyframes admin-spin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-upload-spinner {
+  animation: admin-spin 0.75s linear infinite;
+}
+
+.admin-upload-button--loading {
+  opacity: 0.72;
+  pointer-events: none;
+  cursor: not-allowed;
+}

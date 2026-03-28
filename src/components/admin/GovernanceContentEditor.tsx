@@ -3,6 +3,7 @@ import {
   ArrowUp,
   Eye,
   EyeOff,
+  Loader2,
   Plus,
   Trash2,
   Upload,
@@ -12,7 +13,9 @@ import { useState } from 'react';
 import AdminImageUploadField from './AdminImageUploadField';
 import { useAdminEditorPersistence } from './useAdminEditorPersistence';
 import { ADMIN_DRAFT_STORAGE_KEYS } from '../../lib/adminPreview';
+import { uploadArquivo } from '../../lib/fileStorage';
 import { uploadFileToProjectStorage } from '../../lib/fileUpload';
+import { supabase } from '../../lib/supabase';
 import { useGovernance } from '../../lib/GovernanceContext';
 import { GOVERNANCE_SECTION_LABELS, mergeGovernanceContent } from '../../lib/governance';
 import type {
@@ -29,6 +32,17 @@ const MEMBER_IMAGE_UPLOAD_OPTIONS = {
   maxHeight: 1200,
   quality: 0.84,
 };
+
+const ALLOWED_DOC_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
+const ALLOWED_DOC_ACCEPT = ALLOWED_DOC_EXTENSIONS.join(',');
+const MAX_DOC_SIZE_MB = 10;
+
+function resolveDocumentPasta(category: string): 'documentos' | 'editais' | 'relatorios' | 'geral' {
+  const lower = category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (lower.includes('edital')) return 'editais';
+  if (lower.includes('relatorio') || lower.includes('prestacao')) return 'relatorios';
+  return 'documentos';
+}
 
 function createEntityId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -229,17 +243,49 @@ export default function GovernanceContentEditor() {
     setFormState((current) => ({ ...current, documents: normalizeOrderedItems(updater(current.documents)) }));
   }
 
-  async function handleDocumentUpload(documentId: string, event: ChangeEvent<HTMLInputElement>) {
+  async function handleDocumentUpload(documentId: string, documentCategory: string, event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
+
+    const lowerName = file.name.toLowerCase();
+    if (!ALLOWED_DOC_EXTENSIONS.some((ext) => lowerName.endsWith(ext))) {
+      setEditorStatus(
+        `Tipo de arquivo nao permitido. Use: ${ALLOWED_DOC_EXTENSIONS.join(', ')}.`,
+        'error'
+      );
+      return;
+    }
+
+    if (file.size > MAX_DOC_SIZE_MB * 1024 * 1024) {
+      setEditorStatus(
+        `"${file.name}" excede o limite de ${MAX_DOC_SIZE_MB} MB.`,
+        'error'
+      );
+      return;
+    }
+
     setUploadingDocumentId(documentId);
     try {
-      const asset = await uploadFileToProjectStorage(file);
+      let url: string;
+      let resolvedFileName = file.name;
+
+      if (supabase) {
+        const publicUrl = await uploadArquivo(file, resolveDocumentPasta(documentCategory));
+        if (!publicUrl) {
+          throw new Error('Falha no upload para o servidor. Tente novamente ou use um link externo.');
+        }
+        url = publicUrl;
+      } else {
+        const asset = await uploadFileToProjectStorage(file, { maxSizeMb: MAX_DOC_SIZE_MB });
+        url = asset.url;
+        resolvedFileName = asset.fileName;
+      }
+
       updateDocuments((documents) => documents.map((document) => (
-        document.id === documentId ? { ...document, href: asset.url, fileName: asset.fileName } : document
+        document.id === documentId ? { ...document, href: url, fileName: resolvedFileName } : document
       )));
-      setEditorStatus(`Arquivo "${asset.fileName}" anexado ao documento.`, 'success');
+      setEditorStatus(`Arquivo "${resolvedFileName}" enviado com sucesso.`, 'success');
     } catch (error) {
       setEditorStatus(error instanceof Error ? error.message : 'Nao foi possivel enviar o arquivo.', 'error');
     } finally {
@@ -651,12 +697,25 @@ export default function GovernanceContentEditor() {
                   </div>
 
                   <div className="admin-governance-upload-row">
-                    <label htmlFor={uploadInputId} className="button button-outline admin-upload-button">
-                      <Upload size={16} />
+                    <label
+                      htmlFor={uploadInputId}
+                      className={`button button-outline admin-upload-button${isUploading ? ' admin-upload-button--loading' : ''}`}
+                      aria-disabled={isUploading}
+                    >
+                      {isUploading
+                        ? <Loader2 size={16} className="admin-upload-spinner" />
+                        : <Upload size={16} />}
                       {isUploading ? 'Enviando...' : 'Enviar arquivo'}
                     </label>
-                    <input id={uploadInputId} className="sr-only" type="file" onChange={(event) => void handleDocumentUpload(document.id, event)} disabled={isUploading} />
-                    <p className="muted">Arquivos locais pequenos podem ser anexados. Para PDFs maiores, prefira usar link externo.</p>
+                    <input
+                      id={uploadInputId}
+                      className="sr-only"
+                      type="file"
+                      accept={ALLOWED_DOC_ACCEPT}
+                      onChange={(event) => void handleDocumentUpload(document.id, document.category, event)}
+                      disabled={isUploading}
+                    />
+                    <p className="muted">PDF, DOC, DOCX, XLS ou XLSX — maximo {MAX_DOC_SIZE_MB} MB.</p>
                   </div>
                 </ItemShell>
               );
